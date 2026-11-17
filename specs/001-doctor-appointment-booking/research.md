@@ -110,6 +110,59 @@ Utilize a **Secure Room-Token WebRTC / Provider-Agnostic Interface Contract**:
 
 ---
 
+## 7. Symptom Navigator & Side-by-Side Provider Comparison
+
+### Decision
+- **Symptom Navigator**: Deterministic mapping linking common clinical complaints (e.g., "Chest Pain", "Skin Rash", "Child Fever", "Migraine") to primary medical specialties (Cardiology, Dermatology, Pediatrics, Neurology) with 1-click filter activation and real-time guidance notes.
+- **Side-by-Side Comparison Drawer**: Fixed-bottom floating bar with stateful drawer holding up to 3 selected doctors. Comparison table compares verified fees (In-Person & Video), ratings, clinical experience, languages, locations, and direct booking actions. Max limit of 3 enforced with instant toast alerts.
+
+---
+
+## 8. Digital Prescription Letterhead & Print Engine
+
+### Decision
+- **Clinic Letterhead Layout**: Structured clinic header, doctor registration number (MCI/NMC format), patient demographics, vitals strip, Rx watermark, and medication dosage schedule table (Morning - Noon - Night, Timing: Before/After Food, Duration).
+- **Print Optimization**: Native browser print styling (`@media print`) that removes application shells, headers, and buttons, rendering an unskewed A4/Letter printable medical record with digital verification QR code.
+
+---
+
+## 9. Live Clinic Queue Board & In-Call Vitals HUD
+
+### Decision
+- **Queue Board Display**: Full-screen capable electronic token display with "Now In Cabin", "Up Next", and "Waiting" queues, privacy-masked patient names (e.g., "Ramesh K***"), and receptionist call controls.
+- **In-Call Clinical Vitals HUD**: Collapsible clinical overlay inside video consultation room displaying blood group, drug allergies with high-priority alert badges, chronic conditions, and an auto-saving note-taking scratchpad.
+
+---
+
+## 10. Calendar Synchronization & ICS Generation
+
+### Decision
+- Client-side RFC 5545 `.ics` iCalendar file generator with direct web URLs for Google Calendar and Outlook Web Calendar, pre-populating consultation time, doctor name, booking reference, and consultation mode.
+
+---
+
+## 11. Healthcare Color System & Clinical UX Ergonomics
+
+### Decision
+Adopt an ultra-clean, calming clinical healthcare design system that eliminates discordant dark surfaces in favor of an airy, accessible medical aesthetic:
+- **Primary Brand & Trust**: **Medical Trust Blue** (`#2563eb`) and **Serene Ocean Cyan** (`#0284c7`) providing clinical authority, stability, and patient reassurance.
+- **Secondary Wellness & Success**: **Clinical Mint & Medical Teal** (`#0d9488` / `#10b981`) for confirmed booking states, available slots, and positive progress.
+- **Neutral Canvas**: Crisp porcelain canvas (`#f8fafc` / `#ffffff`) with soft card elevation and subtle slate borders (`#e2e8f0` / `#cbd5e1`).
+- **Typography & Accessibility**: Deep Slate (`#0f172a` for primary headings, `#475569` for body/metadata) with a minimum 4.5:1 contrast ratio satisfying **WCAG 2.1 AA** standards.
+- **Semantic Alert Semantics**: Amber (`#d97706`) for active 5-minute temporary holds and waitlists; Crimson (`#dc2626`) for critical drug allergy warnings, late cancellations, and emergency leave notices.
+- **Frictionless UX Workflows**: 3-step checkout stepper with animated progress bar and prominent hold countdown timer pill; 3-click doctor discovery flow from symptom to confirmed slot.
+
+### Rationale
+- Healthcare applications demand clarity, calmness, and immediate trust. Heavy dark blocks create visual fatigue and heighten medical apprehension for patients.
+- A light, crisp medical palette with soft clinical cyan/teal accents aligns with gold-standard health portals (e.g., Mayo Clinic, NHS, Practo, One Medical).
+- Strict adherence to WCAG 2.1 AA ensures elderly and visually impaired patients can comfortably review prescriptions, doctor qualifications, and fees.
+
+### Alternatives Considered
+- *Dark-Mode Default*: Discarded because clinical evaluations, medication tables, and print previews lose legibility and look unnatural in inverted dark palettes.
+- *High-Saturation Monochromatic Blue*: Can cause monotony; introducing calming teal/mint and warm amber accents ensures balanced visual hierarchy and clear status distinctions.
+
+---
+
 ## Summary of Architectural Choices
 
 | Component | Selected Technology | Primary Benefit |
@@ -120,4 +173,9 @@ Utilize a **Secure Room-Token WebRTC / Provider-Agnostic Interface Contract**:
 | **Concurrency Lock** | Database Atomic State Machine + 5-min TTL Sweeper | 100% prevention of double booking |
 | **Auth & Security** | JWT + OTP verification + RBAC middleware | Secure multi-role access and DPDP compliance |
 | **Audit & Logging** | Immutable SQL Audit Log Table | Complete traceability for health compliance |
+| **Design System** | Calming Healthcare Palette (Trust Blue, Teal, Porcelain) | WCAG AA contrast, builds clinical confidence |
+| **Clinical UX** | Symptom Navigator + Side-by-Side Comparison Drawer | Guided discovery in <= 3 clicks |
+| **Digital Prescription** | Print-optimized Letterhead with Rx Watermark & QR | Standard legal medical documentation |
+| **Queue Management** | Live Electronic Board with Token Calling | Reduced waiting room congestion & DPDP privacy |
+| **Telehealth HUD** | In-Call Vitals & Allergy HUD + Scratchpad | Clinical decision support during video visits |
 

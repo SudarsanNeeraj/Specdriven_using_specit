@@ -17,7 +17,10 @@ import {
   BellRing,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Sun,
+  Sunset,
+  Moon
 } from 'lucide-react';
 
 export const DoctorProfilePage: React.FC = () => {
@@ -226,36 +229,85 @@ export const DoctorProfilePage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                {slots.map((slot) => {
-                  const timeLabel = new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                  const isAvailable = slot.status === 'AVAILABLE';
-                  const isHeld = slot.status === 'HELD';
-                  const isBooked = slot.status === 'BOOKED' || slot.status === 'BLOCKED';
+            <div className="space-y-6">
+              {/* Slot Segment Groups (Morning, Afternoon, Evening) */}
+              {[
+                {
+                  title: 'Morning Slots',
+                  desc: 'Before 12:00 PM',
+                  icon: <Sun className="w-4 h-4 text-amber-500" />,
+                  slotsList: slots.filter(s => new Date(s.startTime).getHours() < 12),
+                  badgeColor: 'bg-amber-50 border-amber-200 text-amber-800'
+                },
+                {
+                  title: 'Afternoon Slots',
+                  desc: '12:00 PM - 04:00 PM',
+                  icon: <Sunset className="w-4 h-4 text-orange-500" />,
+                  slotsList: slots.filter(s => {
+                    const h = new Date(s.startTime).getHours();
+                    return h >= 12 && h < 16;
+                  }),
+                  badgeColor: 'bg-orange-50 border-orange-200 text-orange-800'
+                },
+                {
+                  title: 'Evening Slots',
+                  desc: 'After 04:00 PM',
+                  icon: <Moon className="w-4 h-4 text-indigo-500" />,
+                  slotsList: slots.filter(s => new Date(s.startTime).getHours() >= 16),
+                  badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-800'
+                }
+              ].map((segment) => {
+                if (segment.slotsList.length === 0) return null;
+                const openCount = segment.slotsList.filter(s => s.status === 'AVAILABLE').length;
 
-                  return (
-                    <button
-                      key={slot.id}
-                      disabled={!isAvailable || holdingSlotId === slot.id}
-                      onClick={() => handleSlotSelect(slot)}
-                      className={`py-3 px-2 rounded-xl text-center border transition flex flex-col items-center justify-center ${
-                        isAvailable
-                          ? 'border-slate-200 hover:border-brand-500 hover:bg-brand-50 text-slate-800 font-bold shadow-xs cursor-pointer'
-                          : isHeld
-                          ? 'border-amber-300 bg-amber-50/70 text-amber-800 cursor-not-allowed opacity-80'
-                          : 'border-slate-100 bg-slate-100/70 text-slate-400 cursor-not-allowed line-through'
-                      }`}
-                    >
-                      <Clock className="w-3.5 h-3.5 mb-1 text-slate-400" />
-                      <span className="text-xs font-bold">{timeLabel}</span>
-                      <span className="text-[10px] mt-0.5 uppercase tracking-wider font-semibold">
-                        {holdingSlotId === slot.id ? 'Holding...' : isAvailable ? 'Open' : isHeld ? 'On Hold' : 'Taken'}
+                return (
+                  <div key={segment.title} className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-white border border-slate-200 shadow-xs">
+                          {segment.icon}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-800">{segment.title}</h4>
+                          <span className="text-[10px] text-slate-500">{segment.desc}</span>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${segment.badgeColor}`}>
+                        {openCount} Open Slot{openCount !== 1 ? 's' : ''}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                      {segment.slotsList.map((slot) => {
+                        const timeLabel = new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const isAvailable = slot.status === 'AVAILABLE';
+                        const isHeld = slot.status === 'HELD';
+
+                        return (
+                          <button
+                            key={slot.id}
+                            disabled={!isAvailable || holdingSlotId === slot.id}
+                            onClick={() => handleSlotSelect(slot)}
+                            className={`py-2.5 px-2 rounded-xl text-center border transition flex flex-col items-center justify-center ${
+                              isAvailable
+                                ? 'bg-white border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-slate-800 font-bold shadow-xs cursor-pointer'
+                                : isHeld
+                                ? 'border-amber-300 bg-amber-50/80 text-amber-800 cursor-not-allowed opacity-80'
+                                : 'border-slate-200/60 bg-slate-100 text-slate-400 cursor-not-allowed line-through'
+                            }`}
+                          >
+                            <Clock className="w-3 h-3 mb-1 text-slate-400" />
+                            <span className="text-xs font-bold">{timeLabel}</span>
+                            <span className="text-[9px] mt-0.5 uppercase tracking-wider font-semibold">
+                              {holdingSlotId === slot.id ? 'Holding...' : isAvailable ? 'Open' : isHeld ? 'On Hold' : 'Taken'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
 
               {availableSlots.length === 0 && (
                 <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">

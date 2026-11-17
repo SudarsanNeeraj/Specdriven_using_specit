@@ -95,7 +95,7 @@ async function runTests() {
   const waitlistPatientId = uuidv4();
   db.prepare(`
     INSERT INTO users (id, role, name, phone, status, created_at, updated_at)
-    VALUES (?, 'PATIENT', 'Waiting Patient', '+919999988888', 'ACTIVE', datetime('now'), datetime('now'))
+    VALUES (?, 'PATIENT', 'Waiting Patient', '+91' || substr(replace(hex(randomblob(5)), 'A', '1'), 1, 10), 'ACTIVE', datetime('now'), datetime('now'))
   `).run(waitlistPatientId);
 
   const waitlistEntry = WaitlistService.joinWaitlist({

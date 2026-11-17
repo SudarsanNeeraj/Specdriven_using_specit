@@ -235,6 +235,41 @@ Immutable compliance and security trail for DPDP compliance.
 
 ---
 
+### 2.12 `digital_prescriptions` (Clinical Artifact)
+Formatted clinic letterhead prescription record associated with completed visits.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | VARCHAR(36) | Primary UUID identifier |
+| `appointment_id` | VARCHAR(36) | Foreign key to `appointments.id` |
+| `booking_reference` | VARCHAR(24) | Associated booking reference code |
+| `doctor_reg_no` | VARCHAR(32) | MCI / National Medical Council registration code |
+| `diagnosis` | TEXT | Formal medical diagnosis |
+| `symptoms` | JSON TEXT | List of chief complaints |
+| `vitals_snapshot` | JSON TEXT | Recorded BP, Pulse, Temp, Weight at time of consultation |
+| `medicines` | JSON TEXT | Array of medicines with dosage, frequency (Morning/Noon/Night), timing, duration |
+| `doctor_advice` | TEXT | Dietary and lifestyle precautions |
+| `follow_up_date` | VARCHAR(64) | Next recommended review date |
+| `qr_verification_code` | VARCHAR(64) | Cryptographic signature string for authenticity |
+
+---
+
+### 2.13 `queue_tokens` (Waiting Room Queue Artifact)
+Real-time electronic token queue entries for in-clinic waiting room management.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | VARCHAR(36) | UUID identifier |
+| `token_number` | VARCHAR(12) | Formatted token code (e.g. `'A-101'`, `'B-201'`) |
+| `appointment_id` | VARCHAR(36) | Foreign key to `appointments.id` |
+| `patient_masked_name` | VARCHAR(60) | DPDP-compliant masked patient identifier (e.g. `'Ramesh K***'`) |
+| `room_cabin` | VARCHAR(40) | Specific clinic cabin (e.g. `'OPD Cabin 1'`) |
+| `status` | VARCHAR(20) | `'IN_CABIN'`, `'UP_NEXT'`, `'WAITING'`, `'COMPLETED'` |
+| `estimated_wait_minutes` | INTEGER | Projected waiting time in minutes |
+| `scheduled_time` | VARCHAR(20) | Slot start time string |
+
+---
+
 ## 3. State Machines
 
 ### 3.1 Slot Lifecycle State Machine

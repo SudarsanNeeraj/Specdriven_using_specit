@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { Appointment } from '../../types';
 import { ReviewFormModal } from '../../components/consultation/ReviewFormModal';
+import { downloadIcsFile } from '../../utils/calendar';
 import {
   Calendar,
   Clock,
@@ -14,7 +15,10 @@ import {
   CheckCircle2,
   XCircle,
   BellRing,
-  Loader2
+  Loader2,
+  Download,
+  Activity,
+  FileText
 } from 'lucide-react';
 
 export const PatientMyAppointmentsPage: React.FC = () => {
@@ -192,11 +196,32 @@ export const PatientMyAppointmentsPage: React.FC = () => {
 
                   {isConfirmed && (
                     <button
+                      onClick={() => downloadIcsFile(apt)}
+                      className="px-3 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1"
+                      title="Export .ics to your calendar"
+                    >
+                      <Download className="w-3.5 h-3.5 text-slate-500" />
+                      <span>.ics Cal</span>
+                    </button>
+                  )}
+
+                  {isConfirmed && (
+                    <button
                       onClick={() => handleCancelAppointment(apt.id)}
                       className="px-3.5 py-2 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-lg text-xs font-semibold transition"
                     >
                       Cancel Visit
                     </button>
+                  )}
+
+                  {isCompleted && (
+                    <Link
+                      to="/patient/timeline"
+                      className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-xs font-bold transition flex items-center gap-1"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Prescription & History</span>
+                    </Link>
                   )}
 
                   {isCompleted && (

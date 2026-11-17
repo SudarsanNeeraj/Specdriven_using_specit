@@ -100,6 +100,48 @@ npm run dev         # starts React client at http://localhost:5173
    - Interactive charts render showing total bookings, completed consultations, cancellation rates, no-show rates, and revenue breakdowns.
    - Receptionist walk-in booking tool allows manual slot allocation on behalf of patients with "Pay at Clinic" status.
 
+### Scenario 9: Symptom Navigator & Side-by-Side Doctor Comparison (P2)
+1. **Action**: On the home search page, click the **"Chest Pain / Palpitations"** symptom badge.
+2. **Expected Outcome**:
+   - Specialization automatically filters to `Cardiology`.
+   - Matching cardiologists appear with guidance note.
+3. **Action**: Click **"Compare"** on 2 or 3 doctor cards.
+4. **Expected Outcome**:
+   - A floating sticky comparison drawer appears at the bottom with selected doctor avatars.
+   - Clicking **"View Side-by-Side"** opens a comparative table displaying fees (In-Person & Video), ratings, clinical experience, spoken languages, and direct booking actions.
+   - Attempting to add a 4th doctor displays an alert toast.
+
+### Scenario 10: Printable Digital Prescription Letterhead (P2)
+1. **Action**: Navigate to `/patient/timeline` or a completed appointment.
+2. **Action**: Click **"View Print Letterhead"**.
+3. **Expected Outcome**:
+   - Official clinic letterhead modal opens featuring clinic branding, Doctor registration number, Rx watermark, patient demographics, vitals strip, and medication dosage schedule table (Morning - Noon - Night, Timing: Before/After Food, Duration).
+   - Verification QR code and digital doctor signature stamp display.
+   - Clicking **"Print / Download PDF"** triggers clean printer styling (`@media print`) without website headers or UI clutter.
+
+### Scenario 11: Chronological Patient Health Timeline (P2)
+1. **Action**: Open `/patient/timeline`.
+2. **Expected Outcome**:
+   - Vertical timeline organizes consultations, prescriptions, and lab tests chronologically with glowing node indicators.
+   - KPI cards summarize total visits, active prescriptions, and upcoming consultations.
+   - Filter tabs allow toggling between Consultations, Prescriptions, Lab Reports, and Upcoming visits.
+
+### Scenario 12: Live Waiting Room Token Queue Board (P3)
+1. **Action**: Open `/queue-board` (or `/admin/queue-board`).
+2. **Expected Outcome**:
+   - Full-screen capable electronic signage board displays illuminated **"Now In Cabin"** tokens (e.g., `#A-101`), **"Up Next"** queue with estimated waiting times, and privacy-masked patient names.
+   - Clicking **"Call Next Patient"** transitions the next token to cabin status and triggers a simulated chime notification.
+   - Clicking **"Generate Walk-In Token"** creates an instant walk-in token entry.
+
+### Scenario 13: Healthcare Color System & UX Accessibility Validation (P2)
+1. **Action**: Inspect the application interface across home discovery, doctor profile, booking stepper, health timeline, and queue board.
+2. **Expected Outcome**:
+   - Primary buttons, navigation highlights, and brand badges display in **Medical Trust Blue** (`#2563eb`) with **Serene Teal** (`#0d9488`) accentuation.
+   - Background canvas renders on a crisp, airy porcelain background (`#f8fafc` / `#ffffff`) with subtle warm slate card borders (`#e2e8f0`).
+   - Deep slate typography (`#0f172a` / `#334155`) meets or exceeds **WCAG 2.1 AA** color contrast ratios (>= 4.5:1).
+   - Checkout stepper smoothly guides the patient across 3 steps with a visible 5-minute countdown pill.
+   - Doctor cards display trust badges, hospital affiliation, and time-of-day slot pills without visual clutter.
+
 ---
 
 ## 3. Automated Test Commands

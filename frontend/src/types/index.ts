@@ -85,3 +85,74 @@ export interface OperationalReport {
   doctorUtilization: Array<{ id: string; name: string; specialization: string; clinicName: string; totalAppointments: number; completedCount: number }>;
 }
 
+export interface PrescriptionMedicine {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: {
+    morning: boolean;
+    noon: boolean;
+    night: boolean;
+  };
+  timing: 'Before Food' | 'After Food' | 'With Food';
+  duration: string;
+  specialInstruction?: string;
+}
+
+export interface DigitalPrescription {
+  id: string;
+  appointmentId: string;
+  bookingReference: string;
+  doctorName: string;
+  doctorSpecialization: string;
+  doctorQualifications: string;
+  doctorRegNo: string;
+  clinicName: string;
+  clinicAddress: string;
+  clinicPhone: string;
+  patientName: string;
+  patientAge?: number;
+  patientGender?: string;
+  patientBloodGroup?: string;
+  date: string;
+  diagnosis: string;
+  symptoms: string[];
+  vitals?: {
+    bloodPressure?: string;
+    heartRateBpm?: number;
+    temperatureF?: number;
+    weightKg?: number;
+  };
+  medicines: PrescriptionMedicine[];
+  doctorAdvice?: string;
+  followUpDate?: string;
+  qrVerificationCode: string;
+}
+
+export interface QueueToken {
+  id: string;
+  tokenNumber: string; // e.g. "A-101"
+  appointmentId: string;
+  patientName: string; // May be masked e.g. "Ramesh K***"
+  doctorName: string;
+  specialization: string;
+  roomCabin: string; // e.g. "OPD Cabin 3"
+  scheduledTime: string;
+  status: 'IN_CABIN' | 'UP_NEXT' | 'WAITING' | 'COMPLETED';
+  estimatedWaitMinutes: number;
+}
+
+export interface PatientVitalsSummary {
+  bloodGroup: string;
+  allergies: string[];
+  chronicConditions: string[];
+  emergencyContact: {
+    name: string;
+    relationship: string;
+    phone: string;
+  };
+  recentBp?: string;
+  heartRate?: number;
+  weightKg?: number;
+}
+

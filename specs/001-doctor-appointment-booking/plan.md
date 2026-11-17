@@ -39,17 +39,20 @@ The Doctor Appointment Booking System is an interactive, multi-role healthcare s
 - Concurrency support for 1,000+ active users without degradation (SC-003)
 - Atomic slot mutual exclusion with 100% collision prevention (SC-004)
 - Hold release within 15 seconds of 5-minute expiration (SC-005)
+- 100% WCAG 2.1 AA color contrast compliance (>= 4.5:1 for body text, 3:1 for UI elements) (SC-013)
+- Discovery-to-booking initiation in <= 3 visual interactions (SC-014)
 
 **Constraints**:
 - Strict 5-minute atomic lock on slots during checkout
 - Default timezone: Indian Standard Time (IST / UTC+05:30) with UTC storage
 - 2-hour self-service cancellation/reschedule cut-off policy
 - Health data privacy compliance with the Digital Personal Data Protection Act (DPDP Act) and immutable audit logging
+- Unified Clinical Healthcare Design System: Medical Trust Blue (`#2563eb`), Serene Ocean Cyan (`#0284c7`), Clinical Mint/Teal (`#0d9488`), Crisp Porcelain Canvas (`#f8fafc`), Warm Slate borders (`#e2e8f0`), Deep Slate Typography (`#0f172a`), Semantic Alert Coral & Amber
 
 **Scale/Scope**:
-- 3 distinct user roles (Patient, Doctor, Admin/Receptionist)
-- 32 functional requirements across 8 feature domains
-- 11 core data entities
+- 4 distinct user roles (Patient, Doctor, Receptionist, Admin)
+- 42 functional requirements (FR-001 through FR-042) across 12 user stories
+- 11 core data entities + clinical artifacts (Prescription Letterhead, Queue Tokens, Vitals HUD)
 
 ## Constitution Check
 
@@ -60,6 +63,7 @@ The Doctor Appointment Booking System is an interactive, multi-role healthcare s
 | **Modularity & Separation of Concerns** | Frontend and Backend are decoupled into independent `frontend/` and `backend/` packages communicating over well-defined OpenAPI contracts. | **PASSED** |
 | **Contract-First Design** | Formal OpenAPI 3.0 specification ([api-spec.yaml](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/contracts/api-spec.yaml)) and Data Model ([data-model.md](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/data-model.md)) established prior to implementation. | **PASSED** |
 | **Zero Double-Booking Guarantee** | Slot reservation uses atomic conditional database operations and periodic TTL sweepers rather than client-side synchronization. | **PASSED** |
+| **Accessibility & Design Consistency** | Colors strictly conform to WCAG 2.1 AA (4.5:1 minimum contrast), with a calming clinical palette (Medical Blue, Clinical Teal, Porcelain) replacing heavy dark surfaces. | **PASSED** |
 | **Testability & Validation** | End-to-end runnable scenarios outlined in [quickstart.md](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/quickstart.md); automated tests cover contracts, RBAC, and concurrent collisions. | **PASSED** |
 | **Privacy & Security** | RBAC middleware guards all mutations, passwords and OTPs are hashed, medical files are guarded by temporary signed URLs, and audit logs capture all state changes. | **PASSED** |
 
@@ -70,13 +74,15 @@ The Doctor Appointment Booking System is an interactive, multi-role healthcare s
 ```mermaid
 graph TD
     subgraph ClientLayer ["Client Layer (React SPA)"]
-        UI_Patient["Patient Portal<br/>(Search, Slots, Booking, Telehealth, History)"]
-        UI_Doctor["Doctor Portal<br/>(Schedule Builder, Appointment Agenda, Prescriptions)"]
-        UI_Admin["Admin & Receptionist Portal<br/>(Walk-in Booking, Rosters, Metrics & Reports)"]
+        UI_Patient["Patient Portal<br/>(Symptom Navigator, Comparison Drawer, Slot Segments, Telehealth, Health Timeline)"]
+        UI_Doctor["Doctor Portal<br/>(Schedule Builder, Appointment Agenda, Digital Prescription Letterhead)"]
+        UI_Admin["Admin & Receptionist Portal<br/>(Live Queue Board, Walk-in Booking, Rosters, Metrics & Reports)"]
+        UI_HUD["In-Call Clinical Vitals HUD<br/>(Drug Allergy Alerts, Auto-saving Clinical Scratchpad)"]
         StateStore["Client State & Cache<br/>(TanStack Query + Auth Context)"]
         UI_Patient --> StateStore
         UI_Doctor --> StateStore
         UI_Admin --> StateStore
+        UI_HUD --> StateStore
     end
 
     subgraph APILayer ["Backend Service Layer (Node.js / Express)"]
@@ -261,14 +267,14 @@ frontend/
 │   ├── components/         # Reusable presentation & layout components
 │   │   ├── common/         # Buttons, Modals, Badges, Alert notices
 │   │   ├── layout/         # Navbar, Sidebar, Footer, RoleSwitcher
-│   │   ├── search/         # Filter sidebar, Doctor card, Search bar
-│   │   ├── booking/        # Calendar slot picker, 5-min Hold Timer, Checkout stepper
-│   │   ├── consultation/   # Video room embed, Medical record uploader
-│   │   └── reports/        # Metric summary cards, Utilization charts
+│   │   ├── search/         # Filter sidebar, Doctor card, Search bar, SymptomNavigator, DoctorComparisonDrawer
+│   │   ├── booking/        # Calendar slot picker, 5-min Hold Timer, Checkout stepper, Time-of-day Slot Segmenter
+│   │   ├── consultation/   # Video room embed, Medical record uploader, DigitalPrescriptionModal, ClinicalVitalsHud
+│   │   └── reports/        # Metric summary cards, Utilization charts, LiveQueueBoard
 │   ├── pages/              # Role-specific views & routes
-│   │   ├── patient/        # SearchPage, DoctorDetailPage, MyBookingsPage, TelehealthPage
+│   │   ├── patient/        # SearchPage, DoctorDetailPage, MyBookingsPage, TelehealthPage, PatientHealthTimelinePage
 │   │   ├── doctor/         # DoctorSchedulePage, ConsultationAgendaPage
-│   │   ├── admin/          # AdminReportsPage, ReceptionistBookingPage, RosterPage
+│   │   ├── admin/          # AdminReportsPage, ReceptionistBookingPage, RosterPage, LiveQueueBoardPage
 │   │   └── auth/           # LoginPage, RegisterPage, ForgotPasswordPage
 │   ├── hooks/              # Custom React hooks (useAuth, useSlots, useHoldTimer)
 │   ├── services/           # Axios API client bindings matching OpenAPI specs

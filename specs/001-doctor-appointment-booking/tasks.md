@@ -166,6 +166,39 @@ description: "Task list for Doctor Appointment Booking System implementation"
 
 ---
 
+## Phase 10: Advanced Clinical UX & Enhanced Features (User Stories 7–10)
+
+**Purpose**: Deliver eye-appealing clinical UI, symptom-guided search, side-by-side comparison drawer, time-of-day slot segmentation, digital prescription letterhead generator, patient health timeline, live queue board, and in-call clinical vitals HUD.
+
+- [X] T059 [P] [US7] Create interactive Symptom-to-Specialization navigator with symptom badges in frontend/src/components/search/SymptomNavigator.tsx
+- [X] T060 [P] [US7] Create side-by-side Doctor Comparison Drawer & Modal comparing up to 3 doctors in frontend/src/components/search/DoctorComparisonDrawer.tsx
+- [X] T061 [US7] Update DoctorCard and DoctorSearchPage with comparison selector, symptom filtering, and time-of-day (Morning/Afternoon/Evening) slot segmentation in frontend/src/components/search/DoctorCard.tsx and frontend/src/pages/patient/DoctorSearchPage.tsx
+- [X] T062 [P] [US8] Create print-ready Digital Prescription Modal with clinic letterhead, Rx watermark, medicine dosage schedule table, and PDF/print action in frontend/src/components/consultation/DigitalPrescriptionModal.tsx
+- [X] T063 [P] [US8] Create interactive chronological Patient Health Timeline organizing visits, prescriptions, and lab tests in frontend/src/pages/patient/PatientHealthTimelinePage.tsx
+- [X] T064 [P] [US9] Create Live Reception Queue Display Board with real-time tokens, waiting room status, and estimated wait times in frontend/src/pages/admin/LiveQueueBoardPage.tsx
+- [X] T065 [P] [US10] Create in-call Clinical Vitals HUD and live clinical note-taking scratchpad in frontend/src/components/consultation/ClinicalVitalsHud.tsx and integrate into frontend/src/pages/patient/TelehealthRoomPage.tsx
+- [X] T066 [P] [US2] Implement one-click calendar export (.ics file download and Google/Outlook calendar URLs) in frontend/src/pages/patient/BookingConfirmationPage.tsx and frontend/src/pages/patient/PatientMyAppointmentsPage.tsx
+- [X] T067 Update Navbar navigation links, quick shortcuts, and App.tsx routes for new views in frontend/src/components/layout/Navbar.tsx and frontend/src/App.tsx
+- [X] T068 Verify frontend build and styling with Vite production bundle execution
+
+---
+
+## Phase 11: Healthcare Color System & Clinical UX Re-Engineering (User Stories 11 & 12)
+
+**Purpose**: Transition the React frontend to a calming clinical healthcare color system (Medical Trust Blue, Serene Cyan/Teal, Crisp Porcelain Canvas, Deep Slate Typography, WCAG AA compliance) and re-engineer user journeys into streamlined, frictionless flows.
+
+- [X] T069 [P] [US11] Configure unified Healthcare Color Palette and typography tokens in frontend/tailwind.config.js and frontend/src/index.css (Medical Trust Blue `#2563eb`, Serene Ocean Cyan `#0284c7`, Clinical Mint/Teal `#0d9488`, Crisp Porcelain Canvas `#f8fafc`, Soft Warm Slate borders `#e2e8f0`, Deep Slate Typography `#0f172a`)
+- [X] T070 [P] [US11] Re-skin ShellLayout and Navbar with airy medical porcelain styling, subtle card borders, and accessible high-contrast navigation in frontend/src/components/layout/ShellLayout.tsx and frontend/src/components/layout/Navbar.tsx
+- [X] T071 [US11] Re-skin DoctorSearchPage, FilterSidebar, and SymptomNavigator to replace heavy dark blocks with crisp clinical card elevation, active count badges, and clear visual hierarchy in frontend/src/pages/patient/DoctorSearchPage.tsx, frontend/src/components/search/FilterSidebar.tsx, and frontend/src/components/search/SymptomNavigator.tsx
+- [X] T072 [P] [US11] Re-skin DoctorCard and DoctorComparisonDrawer with trust seals, hospital affiliations, clean slot pill segment badges, and accessible WCAG AA contrast in frontend/src/components/search/DoctorCard.tsx and frontend/src/components/search/DoctorComparisonDrawer.tsx
+- [X] T073 [US12] Re-engineer BookingStepper and BookingConfirmationPage with a refined 3-step animated checkout flow, prominent 5-minute countdown pill, and accessible review summary in frontend/src/components/booking/BookingStepper.tsx and frontend/src/pages/patient/BookingConfirmationPage.tsx
+- [X] T074 [P] [US12] Re-skin PatientHealthTimelinePage and DigitalPrescriptionModal with clean medical porcelain styling, luminous status nodes, and authentic letterhead typography in frontend/src/pages/patient/PatientHealthTimelinePage.tsx and frontend/src/components/consultation/DigitalPrescriptionModal.tsx
+- [X] T075 [P] [US12] Re-skin LiveQueueBoardPage for optimal physical waiting room signage visibility, featuring high-contrast token numbers, prominent cabin highlights, and audio chime indicators in frontend/src/pages/admin/LiveQueueBoardPage.tsx
+- [X] T076 [P] [US12] Re-skin TelehealthRoomPage and ClinicalVitalsHud with distraction-free video feeds, clean vitals cards, and high-visibility crimson allergy alert tags in frontend/src/pages/patient/TelehealthRoomPage.tsx and frontend/src/components/consultation/ClinicalVitalsHud.tsx
+- [X] T077 [US11] Execute WCAG 2.1 AA color contrast validation and frontend bundle build verification via npm --prefix frontend run build
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -184,6 +217,8 @@ flowchart TD
     Phase6 --> Phase9
     Phase7 --> Phase9
     Phase8 --> Phase9
+    Phase9 --> Phase10["Phase 10: Advanced Clinical UX & Enhanced Features"]
+    Phase10 --> Phase11["Phase 11: Healthcare Color System & UX Re-Engineering"]
 ```
 
 ### User Story Dependencies
@@ -235,4 +270,6 @@ Task T028: "Create frontend BookingModal and CheckoutStepper in frontend/src/com
 - **Increment 4 (Consultation Quality)**: Phase 7 enables medical document attachments and verified doctor reviews.
 - **Increment 5 (Clinic Operations)**: Phase 8 provides receptionist walk-in booking and admin analytics.
 - **Increment 6 (Hardening)**: Phase 9 stress-tests concurrency and verifies the quickstart guide.
+- **Increment 7 (Advanced Clinical Features)**: Phase 10 introduces symptom navigator, comparison drawer, digital prescription letterhead, health timeline, and live queue board.
+- **Increment 8 (Healthcare Design System & UX Re-Engineering)**: Phase 11 transitions the frontend to an accessible, calming clinical palette (Medical Trust Blue, Serene Cyan/Teal, Crisp Porcelain) and streamlines multi-step patient flows for WCAG 2.1 AA compliance.
 

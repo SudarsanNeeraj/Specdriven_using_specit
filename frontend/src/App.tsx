@@ -11,9 +11,11 @@ import { DoctorProfilePage } from './pages/patient/DoctorProfilePage';
 import { BookingConfirmationPage } from './pages/patient/BookingConfirmationPage';
 import { PatientMyAppointmentsPage } from './pages/patient/PatientMyAppointmentsPage';
 import { PatientMedicalRecordsPage } from './pages/patient/PatientMedicalRecordsPage';
+import { PatientHealthTimelinePage } from './pages/patient/PatientHealthTimelinePage';
 import { TelehealthRoomPage } from './pages/patient/TelehealthRoomPage';
 import { DoctorDashboardPage } from './pages/doctor/DoctorDashboardPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
+import { LiveQueueBoardPage } from './pages/admin/LiveQueueBoardPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 
@@ -36,6 +38,7 @@ export const App: React.FC = () => {
               {/* Public Routes */}
               <Route index element={<DoctorSearchPage />} />
               <Route path="doctor/:id" element={<DoctorProfilePage />} />
+              <Route path="queue-board" element={<LiveQueueBoardPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
 
@@ -44,6 +47,7 @@ export const App: React.FC = () => {
                 <Route path="patient/booking-success/:id" element={<BookingConfirmationPage />} />
                 <Route path="patient/appointments" element={<PatientMyAppointmentsPage />} />
                 <Route path="patient/records" element={<PatientMedicalRecordsPage />} />
+                <Route path="patient/timeline" element={<PatientHealthTimelinePage />} />
                 <Route path="telehealth/:roomId" element={<TelehealthRoomPage />} />
               </Route>
 
@@ -55,6 +59,7 @@ export const App: React.FC = () => {
               {/* Admin & Receptionist Protected Routes */}
               <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
                 <Route path="admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="admin/queue-board" element={<LiveQueueBoardPage />} />
               </Route>
 
               {/* Fallback */}
@@ -68,4 +73,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
