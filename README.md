@@ -83,11 +83,28 @@ When you run Spec Kit workflows in this project:
 │   ├── templates/               # Markdown templates (spec, plan, tasks, checklist)
 │   └── workflows/               # Specification automation workflows
 ├── specs/                       # Generated feature specs, plans, and task breakdowns
+├── docs/assets/                 # Architecture diagrams and design assets
+├── SYSTEM_OVERVIEW.md           # Detailed architecture breakdown and system diagrams
 ├── .gitignore                   # Excludes virtual environments & local feature state (.specify/feature.json)
 ├── README.md                    # Main project overview and workflow documentation
 ├── SPECIFY_SETUP.md             # Complete specify-cli installation & troubleshooting guide
 └── requirements.txt             # Project Python dependencies
 ```
+
+---
+
+## 🏛️ Active Feature: Doctor Appointment Booking System
+
+- 📖 **Architecture Overview**: 👉 **[SYSTEM_OVERVIEW.md](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/SYSTEM_OVERVIEW.md)**  
+  *Contains the comprehensive system architecture diagram, layer-by-layer breakdown (React SPA, Node.js/Express API, Relational DB, WebRTC), 5-minute atomic slot hold flow, and automated waitlist mechanics.*
+
+- 📂 **Specification Artifacts**:
+  - [Feature Spec (`spec.md`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/spec.md)
+  - [Implementation Plan (`plan.md`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/plan.md)
+  - [Technical Research & Decisions (`research.md`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/research.md)
+  - [Data Model & State Machines (`data-model.md`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/data-model.md)
+  - [OpenAPI 3.0 API Specification (`contracts/api-spec.yaml`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/contracts/api-spec.yaml)
+  - [Validation & Quickstart Guide (`quickstart.md`)](file:///c:/Users/Pathi/Documents/specdriven_sepecit/Specdriven_using_specit/specs/001-doctor-appointment-booking/quickstart.md)
 
 ---
 
