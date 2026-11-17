@@ -1,0 +1,875 @@
+openapi: 3.0.3
+info:
+  title: Doctor Appointment Booking System API
+  version: 1.0.0
+  description: REST API specification for patient bookings, doctor schedules, video consultations, medical records, and clinic administrative workflows.
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+
+paths:
+  # ---------------------------------------------------------
+  # Authentication & Account Endpoints
+  # ---------------------------------------------------------
+  /auth/register:
+    post:
+      summary: Register a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role, name, email, password]
+              properties:
+                role:
+                  type: string
+                  enum: [PATIENT, DOCTOR, RECEPTIONIST, ADMIN]
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/login:
+    post:
+      summary: Authenticate with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/otp/send:
+    post:
+      summary: Send OTP to mobile phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: OTP dispatched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  expiresInSeconds:
+                    type: integer
+
+  /auth/otp/verify:
+    post:
+      summary: Verify OTP code and authenticate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: OTP verified; user authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/me:
+    get:
+      summary: Retrieve current authenticated user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # ---------------------------------------------------------
+  # Doctor Discovery & Directory
+  # ---------------------------------------------------------
+  /doctors:
+    get:
+      summary: Search and filter doctor profiles
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Search by doctor or clinic name
+        - name: specialization
+          in: query
+          schema:
+            type: string
+          description: Medical specialization filter
+        - name: city
+          in: query
+          schema:
+            type: string
+          description: City / location filter
+        - name: maxFee
+          in: query
+          schema:
+            type: number
+          description: Maximum consultation fee filter
+        - name: language
+          in: query
+          schema:
+            type: string
+          description: Spoken language filter
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter doctors with open slots on this date
+      responses:
+        '200':
+          description: Filtered list of doctor profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorCard'
+
+  /doctors/{id}:
+    get:
+      summary: Get detailed doctor profile with ratings and reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorDetail'
+
+  /doctors/{id}/slots:
+    get:
+      summary: Query bookable slots for a doctor within a date range
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of available and held slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSlot'
+
+  # ---------------------------------------------------------
+  # Slot Locking & Concurrency Control
+  # ---------------------------------------------------------
+  /slots/{id}/hold:
+    post:
+      summary: Acquire an atomic 5-minute hold on a slot during booking checkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Slot held successfully; 5-minute countdown started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  slotId:
+                    type: string
+                  status:
+                    type: string
+                    example: HELD
+                  holdExpiresAt:
+                    type: string
+                    format: date-time
+                  remainingSeconds:
+                    type: integer
+                    example: 300
+        '409':
+          description: Slot is already held or booked by another patient
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /slots/{id}/release:
+    post:
+      summary: Explicitly release a held slot if checkout is cancelled
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Slot released back to available inventory
+
+  # ---------------------------------------------------------
+  # Appointments & Booking
+  # ---------------------------------------------------------
+  /appointments:
+    post:
+      summary: Complete booking confirmation for a held slot
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slotId, consultationType, paymentMethod]
+              properties:
+                slotId:
+                  type: string
+                consultationType:
+                  type: string
+                  enum: [IN_PERSON, VIDEO]
+                patientNotes:
+                  type: string
+                paymentMethod:
+                  type: string
+                  enum: [ONLINE_CARD, ONLINE_UPI, PAY_AT_CLINIC]
+      responses:
+        '201':
+          description: Appointment confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '409':
+          description: Slot hold expired or conflicted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Retrieve appointments for the authenticated patient or doctor
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Appointment'
+
+  /appointments/{id}:
+    get:
+      summary: Get appointment details including video consultation access
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  /appointments/{id}/reschedule:
+    post:
+      summary: Reschedule appointment to a new slot (subject to >2h cut-off policy)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newSlotId]
+              properties:
+                newSlotId:
+                  type: string
+      responses:
+        '200':
+          description: Appointment successfully rescheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Past cut-off time or invalid new slot
+
+  /appointments/{id}/cancel:
+    post:
+      summary: Cancel an existing appointment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment cancelled; waitlist triggered
+
+  /appointments/{id}/complete:
+    post:
+      summary: Mark consultation complete and issue summary
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prescriptionNotes:
+                  type: string
+      responses:
+        '200':
+          description: Appointment completed
+
+  # ---------------------------------------------------------
+  # Waitlist
+  # ---------------------------------------------------------
+  /waitlist:
+    post:
+      summary: Join waitlist for a fully booked doctor and date
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [doctorId, targetDate, consultationType]
+              properties:
+                doctorId:
+                  type: string
+                targetDate:
+                  type: string
+                  format: date
+                consultationType:
+                  type: string
+                  enum: [IN_PERSON, VIDEO]
+      responses:
+        '201':
+          description: Successfully joined waitlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaitlistEntry'
+
+  # ---------------------------------------------------------
+  # Doctor Schedule Management
+  # ---------------------------------------------------------
+  /schedules/recurring:
+    get:
+      summary: Retrieve doctor's recurring weekly working hours
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorSchedule'
+    put:
+      summary: Update recurring schedule and slot duration
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DoctorSchedule'
+      responses:
+        '200':
+          description: Schedule updated and slots regenerated
+
+  /schedules/blocks:
+    post:
+      summary: Create a leave block or emergency unavailable window
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [startTime, endTime, reason]
+              properties:
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+                reason:
+                  type: string
+                isEmergency:
+                  type: boolean
+      responses:
+        '201':
+          description: Schedule blocked; affected appointments flagged
+
+  # ---------------------------------------------------------
+  # Medical Records & Prescriptions
+  # ---------------------------------------------------------
+  /appointments/{id}/records:
+    post:
+      summary: Upload a medical record, prescription, or lab report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, recordType]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                recordType:
+                  type: string
+                  enum: [PRESCRIPTION, LAB_REPORT, DIAGNOSTIC_IMAGE, VISIT_SUMMARY, OTHER]
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Medical document uploaded successfully
+    get:
+      summary: Retrieve medical records attached to an appointment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicalRecord'
+
+  # ---------------------------------------------------------
+  # Patient Reviews
+  # ---------------------------------------------------------
+  /appointments/{id}/review:
+    post:
+      summary: Submit a rating and review for a completed appointment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Review posted; doctor score recalculated
+
+  # ---------------------------------------------------------
+  # Administrative & Operational Reports
+  # ---------------------------------------------------------
+  /admin/reports/operational:
+    get:
+      summary: Fetch operational analytics on bookings, revenue, no-shows, and utilization
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: clinicId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationalReport'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters or body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication credentials missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [PATIENT, DOCTOR, RECEPTIONIST, ADMIN]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    DoctorCard:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        specialization:
+          type: string
+        experienceYears:
+          type: integer
+        city:
+          type: string
+        clinicName:
+          type: string
+        inPersonFee:
+          type: number
+        videoFee:
+          type: number
+        ratingAvg:
+          type: number
+        ratingCount:
+          type: integer
+        nextAvailableSlot:
+          type: string
+          format: date-time
+
+    DoctorDetail:
+      allOf:
+        - $ref: '#/components/schemas/DoctorCard'
+        - type: object
+          properties:
+            qualifications:
+              type: string
+            bio:
+              type: string
+            languages:
+              type: array
+              items:
+                type: string
+            clinicAddress:
+              type: string
+
+    AppointmentSlot:
+      type: object
+      properties:
+        id:
+          type: string
+        doctorId:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [AVAILABLE, HELD, BOOKED, BLOCKED]
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+        bookingReference:
+          type: string
+        patientId:
+          type: string
+        patientName:
+          type: string
+        doctorId:
+          type: string
+        doctorName:
+          type: string
+        specialization:
+          type: string
+        consultationType:
+          type: string
+          enum: [IN_PERSON, VIDEO]
+        status:
+          type: string
+          enum: [CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        feeAmount:
+          type: number
+        paymentStatus:
+          type: string
+          enum: [PAID, PENDING, AT_CLINIC, REFUNDED]
+        videoRoomUrl:
+          type: string
+          nullable: true
+
+    WaitlistEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        doctorId:
+          type: string
+        targetDate:
+          type: string
+          format: date
+        consultationType:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, NOTIFIED, CLAIMED, EXPIRED]
+
+    DoctorSchedule:
+      type: object
+      properties:
+        dayOfWeek:
+          type: integer
+        shiftStartTime:
+          type: string
+        shiftEndTime:
+          type: string
+        breakStartTime:
+          type: string
+        breakEndTime:
+          type: string
+        slotDurationMinutes:
+          type: integer
+
+    MedicalRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        appointmentId:
+          type: string
+        recordType:
+          type: string
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    OperationalReport:
+      type: object
+      properties:
+        dateRange:
+          type: string
+        totalBookings:
+          type: integer
+        completedVisits:
+          type: integer
+        cancellationRatePercent:
+          type: number
+        noShowRatePercent:
+          type: number
+        totalRevenue:
+          type: number
+        doctorUtilizationRatePercent:
+          type: number
+

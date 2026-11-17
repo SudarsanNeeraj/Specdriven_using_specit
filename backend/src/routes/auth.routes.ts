@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { AuthController } from '../controllers/auth.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
+
+const router = Router();
+
+router.post('/register', AuthController.register);
+router.post('/login', AuthController.login);
+router.post('/otp/send', AuthController.sendOtp);
+router.post('/otp/verify', AuthController.verifyOtp);
+router.get('/me', authMiddleware as any, AuthController.getMe as any);
+
+export default router;
+
