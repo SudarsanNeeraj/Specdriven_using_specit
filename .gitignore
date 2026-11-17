@@ -1,0 +1,8 @@
+# Virtual Environments
+venv/
+.venv/
+
+# Spec Kit machine-local state (dynamic feature pointer & local storage)
+.specify/feature.json
+.specify/integrations/packages/
+.specify/integrations/packages.json
